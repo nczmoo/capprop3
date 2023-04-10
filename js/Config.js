@@ -1,13 +1,10 @@
 class Config {
-    culture = [
+    cultures = [
         'freedom',
         'tradition',
         'diversity',
         'religion',
     ]
-    business = [
-        'margin',
-
-    ]
-    numOfWordsInQueue = 40;
+    maxNumOfCulturesOnCard = 3;
+    maxReqCulture = 2;
 }
