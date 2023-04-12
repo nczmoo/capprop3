@@ -40,6 +40,12 @@ class Game{
 		this.labor[laborID].assignedTo = developmentID;
 		ui.refresh();
 	}
+
+	assignCultureProduct(cultureID, productID){
+
+		this.products[productID].assignedTo = cultureID;
+		ui.refresh();
+	}
 	
 	createCultureCard(){
 		let numOfCultures = randNum (1, this.config.maxNumOfCulturesOnCard);
@@ -55,7 +61,7 @@ class Game{
 				break;
 			}
 		}
-		return {cultures: cultures, req: req};
+		return {cultures: cultures, req: req, pay: randNum(this.config.minCulturePay, this.config.maxCulturePay), exp: this.fetchExp()};
 		
 	}
 
@@ -68,6 +74,21 @@ class Game{
 		}
 		return assigned;
 	}
+	fetchAssignedProduct(cultureID){
+		let assigned = [];
+		
+		for (let id in this.products){
+			if (this.products[id].assignedTo == cultureID){
+				assigned.push(id);
+			}
+		}
+		return assigned;		
+	}
+	fetchExp(){
+		let now = Date.now();
+		let mins = randNum(5, 15);
+		return now + (mins * 60 * 1000);
+	}
 
 	finishDevelopment(developmentID){
 		let assigned = this.fetchAssigned(developmentID);		
@@ -75,6 +96,7 @@ class Game{
 			this.labor[laborID].assignedTo = null;
 		}
 		this.products.push(this.development.splice(developmentID, 1)[0])
+		this.products[this.products.length - 1].assignedTo = null;
 		ui.refresh();
 	}
 
@@ -98,7 +120,23 @@ class Game{
 	}
 
 	looping(){
-		
+		for (let i in game.cultureCards){		
+			$("#cultureExp-" + i).html(ui.printExp(game.cultureCards[i].exp));
+			if (game.cultureCards[i].exp < Date.now()){
+				game.cultureCards.splice(i, 1);
+				game.cultureCards.push(game.createCultureCard());
+
+				ui.refresh();
+			}
+			
+			if (game.products.length > 0){
+				let assigned = game.fetchAssignedProduct(i);
+				console.log(assigned);
+				for (let productID in assigned){
+					game.workCulture(i, productID);
+				}
+			}
+		}
 		for (let i in game.labor){
 			if (game.money < game.labor[i].wage){
 				game.fire(i);
@@ -138,7 +176,7 @@ class Game{
 			if (work >= goal){
 				continue;
 			}
-			this.development[developmentID][culture].work += (labor.skills[culture] * 10); //* .01);			
+			this.development[developmentID][culture].work += (labor.skills[culture] * .03);			
 			$("#workProgress-" + developmentID + "-" + culture)
 				.css('width', Math.round(this.development[developmentID][culture].work 
 					/ this.development[developmentID][culture].goal * 100));
@@ -147,5 +185,13 @@ class Game{
 				this.finishDevelopment(developmentID);
 			}
 		}
+	}
+
+	workCulture(cultureID, productID){
+		let culture = this.cultureCards[cultureID];
+		console.log(this.money);
+		this.money += culture.pay;
+		console.log(this.money);
+		$("#money").html("$" + this.money.toLocaleString());
 	}
 }

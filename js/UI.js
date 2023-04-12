@@ -53,13 +53,21 @@ class UI{
 	}
 
 	printCard(id){
-		let txt = '';
+		let txt = "<div class='text-center mb-3'>$" + game.cultureCards[id].pay.toLocaleString() + "</div>";
 		for (let i in game.cultureCards[id].cultures){
 			txt += "<div class='text-center'>" 
 				+ game.cultureCards[id].cultures[i] + ": " 
 				+ game.cultureCards[id].req[i] 
 				+ "</div>";
 		}
+		if (game.products.length > 0){
+			txt += "<div class='text-center'>Assign: <select id='assignCultureProduct-" + id + "' "
+				+ " class='assignCultureProduct'>"
+				+ this.printProductOptions()
+				+ "</select></div>"
+		}
+		txt += "<div id='cultureExp-" + id + "' class='text-center mt-3'>" 
+			+ ui.printExp(game.cultureCards[id].exp) + "</div>";
 		return txt;
 	}
 
@@ -108,6 +116,11 @@ class UI{
 		$("#development").html(txt);
 	}
 
+	printExp(exp){
+		let seconds = Math.round((exp - Date.now()) / 1000);
+		return  seconds + "s";
+	}
+
 	printLabor(){		
 		let txt = '';
 		for (let i in game.labor){
@@ -142,14 +155,31 @@ class UI{
 		return txt;
 	}
 
+	printProductOptions(){
+		let txt = "<option></option>";
+		for (let i in game.products){
+			txt += "<option value='" + i + "'>Product #" 
+				+ (Number(i) + 1) + "</option>"			
+		}
+		return txt;
+	}
+
 	printProducts(){
 		let txt = "<div class='fw-bold'>Products</div>";
 		for (let productID in game.products){
 			let product = game.products[productID];
 			txt += "<div class='ms-3'>Cost: $" 
-				+ product.cost.toLocaleString() + "</div>";
+				+ product.cost.toLocaleString() 
+				+ "</div>"
+				+ "<div class='ms-3'>Assigned to: ";
+				let assignment = " none";
+				if (product.assignedTo != null){
+					assignment =  " Culture #" + (Number(product.assignedTo) + 1);
+				}
+				txt += assignment + "</div>";
+			
 			for (let culture in product){
-				if (culture == 'cost'){
+				if (culture == 'cost' || culture == "assignedTo"){
 					continue;
 				}
 				let goal = product[culture].goal;

@@ -2,6 +2,12 @@ $(document).on('click', '', function(e){
 
 })
 
+$(document).on('change', '.assignCultureProduct', function(e){
+	if ($("#" + e.target.id).val() == ''){
+		return;
+	}
+	game.assignCultureProduct(e.target.id.split('-')[1], $("#" + e.target.id).val());
+})
 
 $(document).on('change', '.devAssign', function(e){
 	game.assign(e.target.id.split('-')[1], $("#devAssign-" + e.target.id.split('-')[1]).val());
